@@ -27,7 +27,7 @@ Resources:
   GetHelloWorld:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-codestar.me'
+      FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-codestar-me'
       Handler: main
       Runtime: go1.x
       Role:
