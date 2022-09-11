@@ -27,7 +27,7 @@ Resources:
   GetHelloWorld:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-GetHelloWorld'
+      FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-codestar.me'
       Handler: main
       Runtime: go1.x
       Role:
@@ -35,11 +35,21 @@ Resources:
         - LambdaExecutionRole
         - Arn
       Events:
-        GetEvent:
+        GetIndexEvent:
           Type: Api
           Properties:
             Path: /
             Method: get
+        GetEvent:
+          Type: Api
+          Properties:
+            Path: /{fullpath+}
+            Method: get
+        PostEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: post
   LambdaExecutionRole:
     Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role
@@ -55,3 +65,8 @@ Resources:
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
       PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/CodeStar_${ProjectId}_PermissionsBoundary'
+  DynamoDBItems:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      PrimaryKey: ref
+      TableName: codestar.me
