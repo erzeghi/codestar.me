@@ -14,20 +14,28 @@ Parameters:
     Type: String
     Description: The name for a project pipeline stage, such as Staging or Prod, for which resources are provisioned and deployed.
     Default: ''
+  CertArn:
+    Type: String
+    Description: Custom domain certificate ARN
+    Default: ''
+  ZoneId:
+    Type: String
+    Description:  Custom domain ZoneID
+    Default: ''
 
 Globals:
   Function:
     AutoPublishAlias: live
     DeploymentPreference:
       Enabled: true
-      Type: Canary10Percent5Minutes
+      Type: AllAtOnce
       Role: !Ref CodeDeployRole
 
 Resources:
-  GetHelloWorld:
+  CodestarHandler:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-codestar-me'
+      FunctionName: !Sub 'awscodestar-${ProjectId}-lambda-codestar-me-handler'
       Handler: main
       Runtime: go1.x
       Role:
@@ -36,20 +44,35 @@ Resources:
         - Arn
       Events:
         GetIndexEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
+            ApiId: !Ref HttpApi
             Path: /
             Method: get
         GetEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
+            ApiId: !Ref HttpApi
             Path: /{fullpath+}
             Method: get
         PostEvent:
-          Type: Api
+          Type: HttpApi
           Properties:
+            ApiId: !Ref HttpApi
             Path: /
             Method: post
+  HttpApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      Domain:
+        DomainName: codestar.me
+        CertificateArn: !Ref CertArn
+        Route53:
+          HostedZoneId: !Ref ZoneId
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 10
+        ThrottlingRateLimit: 10
+
   LambdaExecutionRole:
     Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role
