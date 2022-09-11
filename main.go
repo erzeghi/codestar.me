@@ -167,8 +167,9 @@ func errorResponse(err error, userMessage string) (events.APIGatewayV2HTTPRespon
 
 func validResponse(body string) (events.APIGatewayV2HTTPResponse, error) {
 	return events.APIGatewayV2HTTPResponse{
-		StatusCode: 200,
-		Body:       body,
+		StatusCode:      200,
+		Body:            body,
+		IsBase64Encoded: false,
 		Headers: map[string]string{
 			"Content-Type": "text/plain",
 		},

@@ -42,6 +42,11 @@ Resources:
         Fn::GetAtt:
         - LambdaExecutionRole
         - Arn
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref DynamoDBItems
+        - DynamoDBWritePolicy:
+            TableName: !Ref DynamoDBItems
       Events:
         GetIndexEvent:
           Type: HttpApi
@@ -72,7 +77,6 @@ Resources:
       DefaultRouteSettings:
         ThrottlingBurstLimit: 10
         ThrottlingRateLimit: 10
-
   LambdaExecutionRole:
     Description: Creating service role in IAM for AWS Lambda
     Type: AWS::IAM::Role
@@ -88,6 +92,7 @@ Resources:
       ManagedPolicyArns:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
       PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/CodeStar_${ProjectId}_PermissionsBoundary'
+
   DynamoDBItems:
     Type: AWS::DynamoDB::Table
     Properties:
