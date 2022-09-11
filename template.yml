@@ -68,5 +68,7 @@ Resources:
   DynamoDBItems:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      PrimaryKey: ref
+      PrimaryKey:
+        Name: ref
+        Type: String
       TableName: codestar.me
