@@ -89,9 +89,18 @@ Resources:
         - !Sub 'arn:${AWS::Partition}:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
       PermissionsBoundary: !Sub 'arn:${AWS::Partition}:iam::${AWS::AccountId}:policy/CodeStar_${ProjectId}_PermissionsBoundary'
   DynamoDBItems:
-    Type: AWS::Serverless::SimpleTable
+    Type: AWS::DynamoDB::Table
     Properties:
-      PrimaryKey:
-        Name: ref
-        Type: String
       TableName: codestar.me
+      AttributeDefinitions:
+        - AttributeName: "ref"
+          AttributeType: "S"
+      KeySchema:
+        - AttributeName: "ref"
+          KeyType: "HASH"
+      TimeToLiveSpecification:
+        AttributeName: expire
+        Enabled: true
+      ProvisionedThroughput:
+        ReadCapacityUnits: 0
+        WriteCapacityUnits: 0
