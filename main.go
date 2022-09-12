@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	baseURL       = "http://codestar.me/"
+	baseURL       = "https://codestar.me/"
 	tableName     = "codestar.me"
 	maxBodyLength = 500
 )
@@ -65,13 +65,16 @@ func handler(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPRes
 	case "POST":
 		// take body
 
-		body := strings.TrimSpace(request.Body)
+		body, err := getBody(request)
+		if err != nil {
+			return errorResponse(fmt.Errorf("getBody error: %w", err), "error saving item")
+		}
 		if len(body) > maxBodyLength {
 			return errorResponse(fmt.Errorf("body limit error"), fmt.Sprintf("body too big. max %d characters", maxBodyLength))
 		}
 		ref := makeRef(body)
 
-		err := saveItem(ref, body)
+		err = saveItem(ref, body)
 		if err != nil {
 			return errorResponse(err, "error saving item")
 		}
@@ -80,6 +83,20 @@ func handler(request events.APIGatewayV2HTTPRequest) (events.APIGatewayV2HTTPRes
 	default:
 		return errorResponse(fmt.Errorf("not valid method "), "not valid method")
 	}
+}
+
+func getBody(request events.APIGatewayV2HTTPRequest) (string, error) {
+	var body string
+	if request.IsBase64Encoded {
+		bodyBytes, err := base64.URLEncoding.DecodeString(request.Body)
+		if err != nil {
+			return "", err
+		}
+		body = string(bodyBytes)
+	} else {
+		body = request.Body
+	}
+	return strings.TrimSpace(body), nil
 }
 
 func makeRef(body string) string {
@@ -167,11 +184,11 @@ func errorResponse(err error, userMessage string) (events.APIGatewayV2HTTPRespon
 
 func validResponse(body string) (events.APIGatewayV2HTTPResponse, error) {
 	return events.APIGatewayV2HTTPResponse{
-		StatusCode:      200,
-		Body:            body,
-		IsBase64Encoded: false,
+		StatusCode: 200,
+		Body:       body,
+		//IsBase64Encoded: true,
 		Headers: map[string]string{
-			"Content-Type": "text/plain",
+			"Content-Type": "text/plain charset=utf-8",
 		},
 	}, nil
 }
